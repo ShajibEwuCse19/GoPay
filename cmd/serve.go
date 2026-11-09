@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/ShajibEwuCse19/gopay-core/config"
 	"github.com/ShajibEwuCse19/gopay-core/infra/db"
@@ -11,7 +10,6 @@ import (
 	"github.com/ShajibEwuCse19/gopay-core/rest"
 	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/customer"
 	services "github.com/ShajibEwuCse19/gopay-core/services/customer"
-	"github.com/ShajibEwuCse19/gopay-core/utils"
 )
 
 func Serve() {
@@ -19,7 +17,6 @@ func Serve() {
 	fmt.Println("Version:", config.Version)
 	fmt.Println("Service Name:", config.ServiceName)
 	fmt.Println("Http Port:", config.HttpPort)
-	utils.FreePort(":" + strconv.Itoa(config.HttpPort))
 
 	dbCon, err := db.NewConnection(config)
 	if err != nil {
