@@ -21,6 +21,16 @@ CREATE UNIQUE INDEX uq_customers_email_lower
     ON customers (LOWER(email))
     WHERE email IS NOT NULL;
 
+-- +migrate StatementBegin
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+-- +migrate StatementEnd
+
 CREATE TRIGGER trg_customers_updated_at
     BEFORE UPDATE ON customers
     FOR EACH ROW

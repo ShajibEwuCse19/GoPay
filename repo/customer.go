@@ -18,8 +18,8 @@ func NewCustomerRepo(db *sqlx.DB) services.CustomerRepo {
 
 func (r *customerRepo) Create(c domain.Customer) (*domain.Customer, error) {
 	query := `
-	INSERT INTO customers (first_name, last_name, email, phone_number, hashed_password, created_at, updated_at) 
-	VALUES (:first_name, :last_name, :email, :phone_number, :hashed_password, :created_at, :updated_at)
+	INSERT INTO customers (phone_number, email, full_name, pin_hash)
+	VALUES (:phone_number, :email, :full_name, :pin_hash)
 	RETURNING *
 	`
 
