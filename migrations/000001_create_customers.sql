@@ -38,3 +38,9 @@ CREATE TRIGGER trg_customers_updated_at
     BEFORE UPDATE ON customers
     FOR EACH ROW
     EXECUTE FUNCTION set_updated_at();
+
+-- +migrate Down
+DROP TRIGGER IF EXISTS trg_customers_updated_at ON customers;
+DROP INDEX IF EXISTS uq_customers_email_lower;
+DROP TABLE IF EXISTS customers;
+DROP FUNCTION IF EXISTS set_updated_at();
