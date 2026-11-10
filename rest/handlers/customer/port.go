@@ -1,7 +1,11 @@
 package customer
 
-import "github.com/ShajibEwuCse19/gopay-core/domain"
+import (
+	"context"
+
+	"github.com/ShajibEwuCse19/gopay-core/domain"
+)
 
 type Service interface {
-	Create(c domain.Customer) (*domain.Customer, error)
+	Create(ctx context.Context, c domain.Customer) (*domain.Customer, error)
 }

@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrCustomerAlreadyExists = errors.New("customer already exists")
 
 type Customer struct {
 	ID          string    `json:"id" db:"id"`

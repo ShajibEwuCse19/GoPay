@@ -1,6 +1,10 @@
 package services
 
-import "github.com/ShajibEwuCse19/gopay-core/domain"
+import (
+	"context"
+
+	"github.com/ShajibEwuCse19/gopay-core/domain"
+)
 
 type service struct {
 	customerRepo CustomerRepo
@@ -12,11 +16,10 @@ func NewService(customerRepo CustomerRepo) Service {
 	}
 }
 
-func (s *service) Create(c domain.Customer) (*domain.Customer, error) {
-	customer, err := s.customerRepo.Create(c)
+func (s *service) Create(ctx context.Context, c domain.Customer) (*domain.Customer, error) {
+	customer, err := s.customerRepo.Create(ctx, c)
 	if err != nil {
 		return nil, err
 	}
 	return customer, nil
 }
-

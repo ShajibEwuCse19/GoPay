@@ -39,13 +39,13 @@ func (server *Server) StartServer() {
 		Handler: server.buildHandler(),
 	}
 
-	// ctx is cancelled on Ctrl+C (SIGINT) or SIGTERM
+	// ctx will get cancelled signal on Ctrl+C (SIGINT) or SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	go server.listen(srv, stop)
 
-	<-ctx.Done()
+	<-ctx.Done() // wait for context cancelation(signal)
 	shutdown(srv)
 }
 
