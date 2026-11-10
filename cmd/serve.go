@@ -28,6 +28,7 @@ func Serve() {
 		fmt.Println("db migration err:", err)
 		os.Exit(1)
 	}
+	defer dbCon.Close()
 
 	customerRepo := repo.NewCustomerRepo(dbCon)
 	serviceCustomer := services.NewService(customerRepo)
