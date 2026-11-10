@@ -1,4 +1,4 @@
 -- +migrate Down
-DROP TABLE IF EXISTS customers;
-DROP INDEX IF EXISTS uq_customers_email_lower;
-DROP INDEX IF EXISTS idx_customers_phone_number;
+DROP TRIGGER IF EXISTS trg_customers_updated_at ON customers;
+DROP FUNCTION IF EXISTS set_updated_at();
+DROP TABLE IF EXISTS customers CASCADE;

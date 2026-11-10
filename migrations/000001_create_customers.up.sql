@@ -1,4 +1,6 @@
 -- +migrate Up
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 CREATE TABLE IF NOT EXISTS customers (
     id            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
     phone_number  VARCHAR(20)  NOT NULL,
@@ -17,7 +19,7 @@ CREATE TABLE IF NOT EXISTS customers (
 );
 
 -- Case-insensitive unique email (Rahim@x.com == rahim@x.com)
-CREATE UNIQUE INDEX uq_customers_email_lower
+CREATE UNIQUE INDEX IF NOT EXISTS uq_customers_email_lower
     ON customers (LOWER(email))
     WHERE email IS NOT NULL;
 
@@ -31,6 +33,7 @@ END;
 $$ LANGUAGE plpgsql;
 -- +migrate StatementEnd
 
+DROP TRIGGER IF EXISTS trg_customers_updated_at ON customers;
 CREATE TRIGGER trg_customers_updated_at
     BEFORE UPDATE ON customers
     FOR EACH ROW
