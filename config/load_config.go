@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 	"github.com/joho/godotenv"
 )
 
@@ -57,7 +58,25 @@ func loadConfig() {
 			Password:      password,
 			EnableSSlMode: enableSllMode,
 		},
+		Timeouts: TimeoutConfig{
+			CreateCustomer: durationEnv("CREATE_CUSTOMER_TIMEOUT", 5*time.Second),
+			Shutdown:       durationEnv("SHUTDOWN_TIMEOUT", 10*time.Second),
+		},
 	}
+}
+
+// durationEnv reads an optional duration like "5s" or "500ms"; it falls back to def if unset or invalid.
+func durationEnv(key string, def time.Duration) time.Duration {
+	raw := os.Getenv(key)
+	if raw == "" {
+		return def
+	}
+	d, err := time.ParseDuration(raw)
+	if err != nil || d <= 0 {
+		log.Printf("%s=%q is not a valid duration, using %s", key, raw, def)
+		return def
+	}
+	return d
 }
 
 func GetConfig() *Config {
