@@ -7,5 +7,5 @@ import (
 )
 
 type Service interface {
-	Create(ctx context.Context, c domain.Customer) (*domain.Customer, error)
+	Create(ctx context.Context, in domain.NewCustomer) (*domain.Customer, error)
 }

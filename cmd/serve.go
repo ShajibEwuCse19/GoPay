@@ -32,7 +32,7 @@ func Serve() {
 
 	customerRepo := repo.NewCustomerRepo(dbCon)
 	serviceCustomer := services.NewService(customerRepo)
-	customerHandler := customer.NewHandler(serviceCustomer)
+	customerHandler := customer.NewHandler(config, serviceCustomer)
 	server := rest.NewServer(customerHandler, config)
 	server.StartServer()
 }
