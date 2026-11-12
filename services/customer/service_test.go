@@ -10,7 +10,7 @@ import (
 )
 
 type fakeRepo struct {
-	called   bool
+	called   bool // whether Repo was called or not. Must not call when input is invalid.
 	received domain.Customer
 	err      error
 }
@@ -41,10 +41,12 @@ func TestCreate_HashesPinAndNormalizes(t *testing.T) {
 	in.Email = "  Rahim@Example.COM "
 	in.FullName = "  Rahim Uddin  "
 
+	// feeding input (in) to svc.Create and catching the output(got)
 	if _, err := svc.Create(context.Background(), in); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
+	// Checking the output(got) of svc.Create using correct assertions(want)
 	if repo.received.PinHash == in.Pin {
 		t.Fatal("PIN was stored in plain text")
 	}
@@ -84,8 +86,10 @@ func TestCreate_Validation(t *testing.T) {
 			in := validInput()
 			tt.edit(&in)
 
+			// feeding input (in) to svc.Create and catching the error(got)
 			_, err := NewService(repo).Create(context.Background(), in)
 
+			// Checking the error(got) of svc.Create using correct error matching(want or ValidationError)
 			var vErr *domain.ValidationError
 			if !errors.As(err, &vErr) {
 				t.Fatalf("want ValidationError, got %v", err)
@@ -105,8 +109,10 @@ func TestCreate_CancelledContextSkipsWork(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
+	// feeding input (in) to svc.Create and catching the error(got)
 	_, err := NewService(repo).Create(ctx, validInput())
 
+	// Checking the error(got) of svc.Create using correct error matching(want context.Canceled)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("want context.Canceled, got %v", err)
 	}
@@ -118,8 +124,10 @@ func TestCreate_CancelledContextSkipsWork(t *testing.T) {
 func TestCreate_PassesRepoErrorUp(t *testing.T) {
 	repo := &fakeRepo{err: domain.ErrCustomerAlreadyExists}
 
+	// feeding similar (conflict) input
 	_, err := NewService(repo).Create(context.Background(), validInput())
 
+	// Checking the error(got) of svc.Create using correct error matching(want ErrCustomerAlreadyExists)
 	if !errors.Is(err, domain.ErrCustomerAlreadyExists) {
 		t.Fatalf("want ErrCustomerAlreadyExists, got %v", err)
 	}
