@@ -22,13 +22,13 @@ func JwtAuthMiddleware(next http.Handler) http.Handler {
 func checkAccessToken(w http.ResponseWriter, r *http.Request) bool {
 	header := r.Header.Get("Authorization")
 	if header == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		utils.SendError(w, http.StatusUnauthorized, "Unauthorized")
 		return false
 	}
 
 	headerArray := strings.Split(header, " ")
 	if len(headerArray) != 2 {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		utils.SendError(w, http.StatusUnauthorized, "Unauthorized")
 		return false
 	}
 
@@ -39,7 +39,7 @@ func checkAccessToken(w http.ResponseWriter, r *http.Request) bool {
 		fmt.Println("Token: ", accessToken)
 		return true
 	} else {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		utils.SendError(w, http.StatusUnauthorized, "Unauthorized")
 		return false
 	}
 } 
