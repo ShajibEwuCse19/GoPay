@@ -14,11 +14,15 @@ import (
 // pgUniqueViolation is the PostgreSQL error code for a unique constraint violation.
 const pgUniqueViolation = "23505"
 
+type CustomerRepo interface {
+	services.CustomerRepo
+}
+
 type customerRepo struct {
 	db *sqlx.DB
 }
 
-func NewCustomerRepo(db *sqlx.DB) services.CustomerRepo {
+func NewCustomerRepo(db *sqlx.DB) CustomerRepo {
 	return &customerRepo{
 		db: db,
 	}
@@ -31,6 +35,7 @@ func (r *customerRepo) Create(ctx context.Context, c domain.Customer) (*domain.C
 	RETURNING *
 	`
 
+	// creating rows in db and execute INSERT query using c (domain.Customer)
 	rows, err := r.db.NamedQueryContext(ctx, query, c)
 	if err != nil {
 		return nil, mapCreateError(err)
@@ -45,6 +50,8 @@ func (r *customerRepo) Create(ctx context.Context, c domain.Customer) (*domain.C
 		return nil, sql.ErrNoRows
 	}
 
+	// saving rows into Customer from database 
+	// [KycStatus, Status, CreatedAt, etc. auto-generated fields will be updated in the domain]
 	var customer domain.Customer
 	if err := rows.StructScan(&customer); err != nil {
 		return nil, err
