@@ -3,7 +3,6 @@ package customer
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
@@ -39,12 +38,7 @@ func (h *Handler) CreateCustomers(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(&req); err != nil {
-		var tooLarge *http.MaxBytesError
-		if errors.As(err, &tooLarge) {
-			utils.SendError(w, http.StatusRequestEntityTooLarge, "Request body is too large")
-			return
-		}
-		utils.SendError(w, http.StatusBadRequest, "Invalid request body. Give me valid json")
+		utils.WriteError(w, r, err)
 		return
 	}
 

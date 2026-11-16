@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +19,24 @@ func TestWriteError(t *testing.T) {
 		wantStatus int
 		wantBody   string
 	}{
+		{
+			name:       "request body too large",
+			err:        &http.MaxBytesError{Limit: 1024},
+			wantStatus: http.StatusRequestEntityTooLarge,
+			wantBody:   `"error":"Request body is too large"`,
+		},
+		{
+			name:       "invalid json syntax",
+			err:        &json.SyntaxError{Offset: 5},
+			wantStatus: http.StatusBadRequest,
+			wantBody:   `"error":"Invalid request body. Give me valid json"`,
+		},
+		{
+			name:       "unknown field error",
+			err:        errors.New("json: unknown field \"unknown\""),
+			wantStatus: http.StatusBadRequest,
+			wantBody:   `"error":"Invalid request body. Give me valid json"`,
+		},
 		{
 			name:       "validation error",
 			err:        &domain.ValidationError{Field: "email", Message: "is invalid"},
