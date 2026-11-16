@@ -43,7 +43,7 @@ func WriteError(w http.ResponseWriter, r *http.Request, err error) {
 	case errors.As(err, &syntaxErr),
 		errors.As(err, &unmarshalErr),
 		errors.Is(err, io.EOF),
-		strings.HasPrefix(err.Error(), "json:"):
+		strings.Contains(err.Error(), "json:"):
 		SendError(w, http.StatusBadRequest, "Invalid request body. Give me valid json")
 
 	// Domain Validation Error (e.g. invalid phone, short PIN)
