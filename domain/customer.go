@@ -1,21 +1,9 @@
 package domain
 
 import (
-	"errors"
 	"time"
 )
 
-var ErrCustomerAlreadyExists = errors.New("customer already exists")
-
-// ValidationError is returned when user input breaks a business rule (maps to HTTP 400).
-type ValidationError struct {
-	Field   string
-	Message string
-}
-
-func (e *ValidationError) Error() string {
-	return e.Field + ": " + e.Message
-}
 
 // NewCustomer is the input to register a customer. Pin is the plain PIN; it is hashed in the service.
 type NewCustomer struct {
