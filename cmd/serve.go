@@ -13,10 +13,14 @@ import (
 )
 
 func Serve() {
-	config := config.GetConfig()
+	config, err := config.Load()
+	if err != nil {
+		fmt.Printf("Config error:\n%v\n", err)
+		os.Exit(1)
+	}
 	fmt.Println("Version:", config.Version)
 	fmt.Println("Service Name:", config.ServiceName)
-	fmt.Println("Http Port:", config.HttpPort)
+	fmt.Println("Http Port:", config.HTTP.Port)
 
 	dbCon, err := db.NewConnection(config)
 	if err != nil {

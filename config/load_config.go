@@ -1,9 +1,12 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -11,41 +14,116 @@ import (
 
 var configuration *Config
 
-func loadConfig() {
-	// Load local .env file if available (ignore error in container/production environments)
+// Load loads the local .env file (if present) and parses environment variables.
+// It reports ALL missing required variables at once instead of failing on the first one.
+func Load() (*Config, error) {
 	_ = godotenv.Load()
+	cfg, err := loadFromLookup(os.Getenv)
+	if err != nil {
+		return nil, err
+	}
+	configuration = cfg
+	return cfg, nil
+}
 
+// LoadFromLookup loads configuration using a custom lookup function.
+// Useful for isolated unit testing without depending on os.Getenv or local .env files.
+func LoadFromLookup(lookup func(string) string) (*Config, error) {
+	return loadFromLookup(lookup)
+}
+
+// loadFromLookup parses configuration from any lookup provider (e.g. os.Getenv or a test map).
+func loadFromLookup(lookup func(string) string) (*Config, error) {
+	var missing []string
+	var invalid []string
+
+	require := func(key string) string {
+		val := strings.TrimSpace(lookup(key))
+		if val == "" {
+			missing = append(missing, key)
+			return ""
+		}
+		return val
+	}
+
+	requireInt := func(key string) int {
+		valStr := require(key)
+		if valStr == "" {
+			return 0
+		}
+		val, err := strconv.Atoi(valStr)
+		if err != nil {
+			invalid = append(invalid, fmt.Sprintf("%s=%q (must be an integer)", key, valStr))
+			return 0
+		}
+		return val
+	}
+
+	getEnv := func(key, def string) string {
+		val := strings.TrimSpace(lookup(key))
+		if val == "" {
+			return def
+		}
+		return val
+	}
+
+	intEnv := func(key string, def int) int {
+		raw := strings.TrimSpace(lookup(key))
+		if raw == "" {
+			return def
+		}
+		val, err := strconv.Atoi(raw)
+		if err != nil {
+			log.Printf("%s=%q is not a valid integer, using default %d", key, raw, def)
+			return def
+		}
+		return val
+	}
+
+	durationEnv := func(key string, def time.Duration) time.Duration {
+		raw := strings.TrimSpace(lookup(key))
+		if raw == "" {
+			return def
+		}
+		d, err := time.ParseDuration(raw)
+		if err != nil || d <= 0 {
+			log.Printf("%s=%q is not a valid duration, using default %s", key, raw, def)
+			return def
+		}
+		return d
+	}
+
+	// 1. Service metadata
 	version := getEnv("VERSION", "1.0.0")
 	serviceName := getEnv("SERVICE_NAME", "FINTECH")
 
-	httpPort, err := strconv.Atoi(os.Getenv("HTTP_PORT"))
-	if err != nil {
-		log.Fatal("HTTP_PORT is required and must be an integer")
-		os.Exit(1)
-	}
+	// 2. Required variables
+	httpPort := requireInt("HTTP_PORT")
+	jwtSecretKey := require("JWT_SECRET_KEY")
+	dbHost := require("DB_HOST")
+	dbPort := requireInt("DB_PORT")
+	dbName := require("DB_NAME")
+	dbUser := require("DB_USER")
+	dbPassword := require("DB_PASSWORD")
 
-	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
-	if jwtSecretKey == "" {
-		log.Fatal("JWT_SECRET_KEY is required")
-		os.Exit(1)
-	}
-
-	dbHost := os.Getenv("DB_HOST")
-	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
-	if err != nil {
-		log.Fatal("DB_PORT is required and must be an integer")
-		os.Exit(1)
-	}
-	dbName := os.Getenv("DB_NAME")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
 	enableSllMode, err := strconv.ParseBool(getEnv("DB_ENABLE_SSL_MODE", "false"))
 	if err != nil {
-		log.Fatal("DB_ENABLE_SSL_MODE must be a boolean (true/false)")
-		os.Exit(1)
+		invalid = append(invalid, fmt.Sprintf("DB_ENABLE_SSL_MODE=%q (must be true or false)", lookup("DB_ENABLE_SSL_MODE")))
 	}
 
-	configuration = &Config{
+	// If any required variables are missing or invalid, report all of them at once!
+	var errMsgs []string
+	if len(missing) > 0 {
+		errMsgs = append(errMsgs, fmt.Sprintf("missing required environment variables: %s", strings.Join(missing, ", ")))
+	}
+	if len(invalid) > 0 {
+		errMsgs = append(errMsgs, fmt.Sprintf("invalid environment variables: %s", strings.Join(invalid, ", ")))
+	}
+	if len(errMsgs) > 0 {
+		return nil, errors.New(strings.Join(errMsgs, "; "))
+	}
+
+	cfg := &Config{
 		Version:     version,
 		ServiceName: serviceName,
 
@@ -76,7 +154,7 @@ func loadConfig() {
 		Redis: RedisConfig{
 			Host:     getEnv("REDIS_HOST", "localhost"),
 			Port:     intEnv("REDIS_PORT", 6379),
-			Password: os.Getenv("REDIS_PASSWORD"),
+			Password: lookup("REDIS_PASSWORD"),
 			DB:       intEnv("REDIS_DB", 0),
 		},
 
@@ -89,49 +167,19 @@ func loadConfig() {
 		HttpPort:     httpPort,
 		JWTSecretKey: jwtSecretKey,
 	}
-}
 
-// getEnv reads a string environment variable with a default fallback.
-func getEnv(key, def string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		return def
-	}
-	return val
-}
-
-// intEnv reads an optional integer environment variable; it falls back to def if unset or invalid.
-func intEnv(key string, def int) int {
-	raw := os.Getenv(key)
-	if raw == "" {
-		return def
-	}
-	val, err := strconv.Atoi(raw)
-	if err != nil {
-		log.Printf("%s=%q is not a valid integer, using default %d", key, raw, def)
-		return def
-	}
-	return val
-}
-
-// durationEnv reads an optional duration like "5s" or "500ms"; it falls back to def if unset or invalid.
-func durationEnv(key string, def time.Duration) time.Duration {
-	raw := os.Getenv(key)
-	if raw == "" {
-		return def
-	}
-	d, err := time.ParseDuration(raw)
-	if err != nil || d <= 0 {
-		log.Printf("%s=%q is not a valid duration, using default %s", key, raw, def)
-		return def
-	}
-	return d
+	return cfg, nil
 }
 
 // GetConfig returns the singleton configuration instance.
+// If not loaded, it attempts to load via Load() and logs fatal on error.
 func GetConfig() *Config {
 	if configuration == nil {
-		loadConfig()
+		cfg, err := Load()
+		if err != nil {
+			log.Fatalf("failed to load configuration: %v", err)
+		}
+		configuration = cfg
 	}
 	return configuration
 }
