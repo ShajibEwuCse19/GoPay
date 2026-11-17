@@ -147,7 +147,7 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 			EnableSSlMode:  enableSllMode,
 			MaxConns:       intEnv("DB_MAX_CONNS", 25),
 			MinConns:       intEnv("DB_MIN_CONNS", 5),
-			MigrationsPath: getEnv("DB_MIGRATIONS_PATH", "./migrations"),
+			MigrationsPath: getEnv("DB_MIGRATIONS_PATH", "embedded"),
 		},
 
 		JWT: JWTConfig{

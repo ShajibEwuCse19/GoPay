@@ -35,6 +35,6 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Available Commands:")
 	fmt.Fprintln(os.Stderr, "  serve                       Start the HTTP REST API server")
-	fmt.Fprintln(os.Stderr, "  migrate up [path]           Apply all pending database migrations (default: config or ./migrations)")
+	fmt.Fprintln(os.Stderr, "  migrate up [path]           Apply all pending database migrations (default: embedded in binary)")
 	fmt.Fprintln(os.Stderr, "  migrate down [path]         Roll back the most recent migration")
 }

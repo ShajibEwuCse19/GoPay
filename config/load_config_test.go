@@ -44,8 +44,8 @@ func TestLoadFromLookup_Success(t *testing.T) {
 	if cfg.DB.MaxConns != 25 { // default fallback
 		t.Errorf("DB.MaxConns = %d, want default 25", cfg.DB.MaxConns)
 	}
-	if cfg.DB.MigrationsPath != "./migrations" { // default fallback
-		t.Errorf("DB.MigrationsPath = %q, want default %q", cfg.DB.MigrationsPath, "./migrations")
+	if cfg.DB.MigrationsPath != "embedded" { // default fallback
+		t.Errorf("DB.MigrationsPath = %q, want default %q", cfg.DB.MigrationsPath, "embedded")
 	}
 	if cfg.Timeouts.Shutdown != 10*time.Second {
 		t.Errorf("Timeouts.Shutdown = %v, want 10s", cfg.Timeouts.Shutdown)
