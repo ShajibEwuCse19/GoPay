@@ -3,8 +3,6 @@ package customer
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -40,12 +38,7 @@ func (h *Handler) CreateCustomers(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(&req); err != nil {
-		var tooLarge *http.MaxBytesError
-		if errors.As(err, &tooLarge) {
-			utils.SendError(w, http.StatusRequestEntityTooLarge, "Request body is too large")
-			return
-		}
-		utils.SendError(w, http.StatusBadRequest, "Invalid request body. Give me valid json")
+		utils.WriteError(w, r, err)
 		return
 	}
 
@@ -60,7 +53,7 @@ func (h *Handler) CreateCustomers(w http.ResponseWriter, r *http.Request) {
 		Pin:         req.Pin,
 	})
 	if err != nil {
-		h.writeCreateError(w, r, err)
+		utils.WriteError(w, r, err)
 		return
 	}
 
@@ -73,24 +66,4 @@ func (h *Handler) CreateCustomers(w http.ResponseWriter, r *http.Request) {
 		Status:      created.Status,
 		CreatedAt:   created.CreatedAt,
 	})
-}
-
-// writeCreateError maps an error from the service to an HTTP response.
-func (h *Handler) writeCreateError(w http.ResponseWriter, r *http.Request, err error) {
-	var validationErr *domain.ValidationError
-
-	switch {
-	case errors.As(err, &validationErr):
-		utils.SendError(w, http.StatusBadRequest, validationErr.Error())
-	case errors.Is(err, context.DeadlineExceeded):
-		slog.Warn("register: request timed out", "path", r.URL.Path)
-		utils.SendError(w, http.StatusGatewayTimeout, "Request timed out. Please try again")
-	case errors.Is(err, context.Canceled):
-		slog.Info("register: client cancelled the request", "path", r.URL.Path) // client is gone, nobody to answer
-	case errors.Is(err, domain.ErrCustomerAlreadyExists):
-		utils.SendError(w, http.StatusConflict, "Phone number or email already registered")
-	default:
-		slog.Error("register: failed to create customer", "error", err)
-		utils.SendError(w, http.StatusInternalServerError, "Error creating customer")
-	}
 }

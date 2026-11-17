@@ -3,8 +3,8 @@ package utils
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-	"strings"
 	"github.com/ShajibEwuCse19/gopay-core/config"
+	"strings"
 )
 
 func VerifyJwt(accessToken string) bool {

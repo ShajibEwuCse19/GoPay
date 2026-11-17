@@ -37,6 +37,7 @@ func post(h *Handler, body string) *httptest.ResponseRecorder {
 }
 
 func TestCreateCustomers_Success(t *testing.T) {
+	// fake service return this result
 	h := newTestHandler(&fakeService{result: &domain.Customer{
 		ID:          "id-1",
 		PhoneNumber: "+8801712345678",
@@ -47,8 +48,10 @@ func TestCreateCustomers_Success(t *testing.T) {
 		Status:      "ACTIVE",
 	}})
 
+	// feeding fake servie result and valid body
 	rec := post(h, validBody)
 
+	// checking output and all should be success.
 	if rec.Code != http.StatusCreated {
 		t.Fatalf("status = %d, want 201", rec.Code)
 	}
@@ -62,6 +65,7 @@ func TestCreateCustomers_Success(t *testing.T) {
 }
 
 func TestCreateCustomers_Errors(t *testing.T) {
+	// table for all possible errors
 	tests := []struct {
 		name       string
 		body       string
@@ -78,10 +82,13 @@ func TestCreateCustomers_Errors(t *testing.T) {
 		{"unknown error", validBody, errors.New("boom"), http.StatusInternalServerError},
 	}
 
+	// loop over all possible errors in the table
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// feeding fake service one by one and record response
 			rec := post(newTestHandler(&fakeService{err: tt.svcErr}), tt.body)
 
+			// checking output and all should be wantStatus, if not run next if block
 			if rec.Code != tt.wantStatus {
 				t.Errorf("status = %d, want %d (body: %s)", rec.Code, tt.wantStatus, rec.Body.String())
 			}

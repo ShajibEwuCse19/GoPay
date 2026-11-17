@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/ShajibEwuCse19/gopay-core/config"
 	"github.com/ShajibEwuCse19/gopay-core/infra/db"
+	"github.com/ShajibEwuCse19/gopay-core/infra/logger"
 	"github.com/ShajibEwuCse19/gopay-core/repo"
 	"github.com/ShajibEwuCse19/gopay-core/rest"
 	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/customer"
@@ -13,19 +15,22 @@ import (
 )
 
 func Serve() {
-	config := config.GetConfig()
-	fmt.Println("Version:", config.Version)
-	fmt.Println("Service Name:", config.ServiceName)
-	fmt.Println("Http Port:", config.HttpPort)
+	config, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Config error:\n%v\n", err)
+		os.Exit(1)
+	}
+
+	logger.Init(config.ServiceName, config.LogLevel)
+	slog.Info(
+		"Starting server...",
+		slog.String("version", config.Version),
+		slog.Int("port", config.HTTP.Port),
+	)
 
 	dbCon, err := db.NewConnection(config)
 	if err != nil {
-		fmt.Println("db connection err:", err)
-		os.Exit(1)
-	}
-	err = db.MigrateDB(dbCon, "./migrations") 
-	if err != nil {
-		fmt.Println("db migration err:", err)
+		slog.Error("Database connection failed", "error", err)
 		os.Exit(1)
 	}
 	defer dbCon.Close()

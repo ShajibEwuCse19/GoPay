@@ -7,7 +7,8 @@ import (
 )
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux, manager *middleware.Manager) {
-	mux.Handle("POST /api/v1/auth/customers/register",
+	mux.Handle(
+		"POST /api/v1/auth/customers/register",
 		http.HandlerFunc(h.CreateCustomers),
 	)
 }
