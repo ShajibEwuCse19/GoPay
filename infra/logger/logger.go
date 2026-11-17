@@ -22,7 +22,7 @@ func Init(serviceName, levelStr string) *slog.Logger {
 
 	opts := &slog.HandlerOptions{
 		Level:     level,
-		AddSource: true, 
+		AddSource: true,
 	}
 
 	handler := slog.NewJSONHandler(os.Stdout, opts)

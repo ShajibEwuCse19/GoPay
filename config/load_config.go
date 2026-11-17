@@ -139,14 +139,15 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 		},
 
 		DB: DBConfig{
-			Host:          dbHost,
-			Port:          dbPort,
-			Name:          dbName,
-			User:          dbUser,
-			Password:      dbPassword,
-			EnableSSlMode: enableSllMode,
-			MaxConns:      intEnv("DB_MAX_CONNS", 25),
-			MinConns:      intEnv("DB_MIN_CONNS", 5),
+			Host:           dbHost,
+			Port:           dbPort,
+			Name:           dbName,
+			User:           dbUser,
+			Password:       dbPassword,
+			EnableSSlMode:  enableSllMode,
+			MaxConns:       intEnv("DB_MAX_CONNS", 25),
+			MinConns:       intEnv("DB_MIN_CONNS", 5),
+			MigrationsPath: getEnv("DB_MIGRATIONS_PATH", "./migrations"),
 		},
 
 		JWT: JWTConfig{

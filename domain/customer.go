@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-
 // NewCustomer is the input to register a customer. Pin is the plain PIN; it is hashed in the service.
 type NewCustomer struct {
 	PhoneNumber string
