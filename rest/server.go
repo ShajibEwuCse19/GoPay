@@ -54,7 +54,8 @@ func (server *Server) StartServer() {
 func (server *Server) buildHandler() http.Handler {
 	manager := middleware.NewManager()
 	manager.AppendGlobalMiddlewares(
-		middleware.Recover, // outermost, so it catches panics from every other middleware and handler
+		middleware.RequestID,
+		middleware.Recover, // catches panics from every inner middleware and handler
 		middleware.Cors,
 		middleware.Preflight,
 		middleware.Logger,
