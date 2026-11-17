@@ -18,7 +18,7 @@ var configuration *Config
 // It reports ALL missing required variables at once instead of failing on the first one.
 func Load() (*Config, error) {
 	_ = godotenv.Load()
-	cfg, err := loadFromLookup(os.Getenv)
+	cfg, err := loadFromLookup(os.Getenv) // now, lookup = os.Getenv
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +37,7 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 	var missing []string
 	var invalid []string
 
+	//1. validation annonyous function to check require string, requireInt, getEnv, intEnv, durationEnv
 	require := func(key string) string {
 		val := strings.TrimSpace(lookup(key))
 		if val == "" {
@@ -93,11 +94,12 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 		return d
 	}
 
-	// 1. Service metadata
+	// 2. Service metadata
 	version := getEnv("VERSION", "1.0.0")
 	serviceName := getEnv("SERVICE_NAME", "FINTECH")
+	logLevel := getEnv("LOG_LEVEL", "info")
 
-	// 2. Required variables
+	// 3. Required variables from environment
 	httpPort := requireInt("HTTP_PORT")
 	jwtSecretKey := require("JWT_SECRET_KEY")
 	dbHost := require("DB_HOST")
@@ -123,9 +125,11 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 		return nil, errors.New(strings.Join(errMsgs, "; "))
 	}
 
+	// 4. Set the global Config instance if there is missing or invalid environment variables
 	cfg := &Config{
 		Version:     version,
 		ServiceName: serviceName,
+		LogLevel:    logLevel,
 
 		HTTP: HTTPConfig{
 			Port:         httpPort,

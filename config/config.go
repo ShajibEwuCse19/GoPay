@@ -6,6 +6,7 @@ import "time"
 type Config struct {
 	Version      string
 	ServiceName  string
+	LogLevel     string
 	HTTP         HTTPConfig
 	DB           DBConfig
 	JWT          JWTConfig
