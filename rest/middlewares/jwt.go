@@ -12,7 +12,7 @@ func JwtAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if !checkAccessToken(w, r) {
-				return 
+				return
 			}
 			next.ServeHTTP(w, r)
 		},
@@ -42,4 +42,4 @@ func checkAccessToken(w http.ResponseWriter, r *http.Request) bool {
 		utils.SendError(w, http.StatusUnauthorized, "Unauthorized")
 		return false
 	}
-} 
+}

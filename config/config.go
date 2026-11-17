@@ -4,14 +4,14 @@ import "time"
 
 // Config holds all typed configuration sections for the application.
 type Config struct {
-	Version      string
-	ServiceName  string
-	LogLevel     string
-	HTTP         HTTPConfig
-	DB           DBConfig
-	JWT          JWTConfig
-	Redis        RedisConfig
-	Timeouts     TimeoutConfig
+	Version     string
+	ServiceName string
+	LogLevel    string
+	HTTP        HTTPConfig
+	DB          DBConfig
+	JWT         JWTConfig
+	Redis       RedisConfig
+	Timeouts    TimeoutConfig
 
 	// Backward-compatibility aliases
 	HttpPort     int
@@ -28,14 +28,15 @@ type HTTPConfig struct {
 
 // DBConfig holds PostgreSQL connection settings and pool limits.
 type DBConfig struct {
-	Host          string
-	Port          int
-	Name          string
-	User          string
-	Password      string
-	EnableSSlMode bool
-	MaxConns      int
-	MinConns      int
+	Host           string
+	Port           int
+	Name           string
+	User           string
+	Password       string
+	EnableSSlMode  bool
+	MaxConns       int
+	MinConns       int
+	MigrationsPath string
 }
 
 // JWTConfig holds authentication token secret and expiration durations.

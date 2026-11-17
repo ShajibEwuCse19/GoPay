@@ -35,12 +35,6 @@ func Serve() {
 	}
 	defer dbCon.Close()
 
-	if err := db.MigrateDB(dbCon, "./migrations"); err != nil {
-		slog.Error("Database migration failed", "error", err)
-		os.Exit(1)
-	}
-	slog.Info("Database migrations applied successfully")
-
 	customerRepo := repo.NewCustomerRepo(dbCon)
 	serviceCustomer := services.NewService(customerRepo)
 	customerHandler := customer.NewHandler(config, serviceCustomer)

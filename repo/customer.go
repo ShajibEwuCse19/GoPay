@@ -50,7 +50,7 @@ func (r *customerRepo) Create(ctx context.Context, c domain.Customer) (*domain.C
 		return nil, sql.ErrNoRows
 	}
 
-	// saving rows into Customer from database 
+	// saving rows into Customer from database
 	// [KycStatus, Status, CreatedAt, etc. auto-generated fields will be updated in the domain]
 	var customer domain.Customer
 	if err := rows.StructScan(&customer); err != nil {
@@ -64,8 +64,8 @@ func mapDBError(err error) error {
 	var pqErr *pq.Error
 	if errors.As(err, &pqErr) {
 		switch pqErr.Code {
-		case pgUniqueViolation :
-			return  domain.ErrConflict
+		case pgUniqueViolation:
+			return domain.ErrConflict
 		}
 	}
 	return err

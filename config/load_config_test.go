@@ -9,18 +9,18 @@ import (
 // validTestEnv returns a complete map of valid required and optional environment variables.
 func validTestEnv() map[string]string {
 	return map[string]string{
-		"VERSION":           "1.2.3",
-		"SERVICE_NAME":      "gopay-core",
-		"HTTP_PORT":         "8080",
-		"JWT_SECRET_KEY":    "my_test_secret_key_32_characters",
-		"DB_HOST":           "localhost",
-		"DB_PORT":           "5432",
-		"DB_NAME":           "gopay_db",
-		"DB_USER":           "postgres",
-		"DB_PASSWORD":       "secret",
+		"VERSION":            "1.2.3",
+		"SERVICE_NAME":       "gopay-core",
+		"HTTP_PORT":          "8080",
+		"JWT_SECRET_KEY":     "my_test_secret_key_32_characters",
+		"DB_HOST":            "localhost",
+		"DB_PORT":            "5432",
+		"DB_NAME":            "gopay_db",
+		"DB_USER":            "postgres",
+		"DB_PASSWORD":        "secret",
 		"DB_ENABLE_SSL_MODE": "false",
-		"REDIS_HOST":        "127.0.0.1",
-		"REDIS_PORT":        "6379",
+		"REDIS_HOST":         "127.0.0.1",
+		"REDIS_PORT":         "6379",
 	}
 }
 
@@ -43,6 +43,9 @@ func TestLoadFromLookup_Success(t *testing.T) {
 	}
 	if cfg.DB.MaxConns != 25 { // default fallback
 		t.Errorf("DB.MaxConns = %d, want default 25", cfg.DB.MaxConns)
+	}
+	if cfg.DB.MigrationsPath != "./migrations" { // default fallback
+		t.Errorf("DB.MigrationsPath = %q, want default %q", cfg.DB.MigrationsPath, "./migrations")
 	}
 	if cfg.Timeouts.Shutdown != 10*time.Second {
 		t.Errorf("Timeouts.Shutdown = %v, want 10s", cfg.Timeouts.Shutdown)
@@ -116,5 +119,19 @@ func TestLoadFromLookup_InvalidIntegerReported(t *testing.T) {
 	}
 	if !strings.Contains(errStr, "DB_PORT") {
 		t.Errorf("expected invalid integer error for DB_PORT, got: %s", errStr)
+	}
+}
+
+func TestLoadFromLookup_CustomMigrationsPath(t *testing.T) {
+	env := validTestEnv()
+	env["DB_MIGRATIONS_PATH"] = "/custom/path/migrations"
+
+	cfg, err := LoadFromLookup(func(k string) string { return env[k] })
+	if err != nil {
+		t.Fatalf("expected valid config to load, got error: %v", err)
+	}
+
+	if cfg.DB.MigrationsPath != "/custom/path/migrations" {
+		t.Errorf("DB.MigrationsPath = %q, want %q", cfg.DB.MigrationsPath, "/custom/path/migrations")
 	}
 }
