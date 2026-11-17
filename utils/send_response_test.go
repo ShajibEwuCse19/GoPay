@@ -98,4 +98,16 @@ func TestWriteError(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("includes request_id from context in error response", func(t *testing.T) {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/test", nil)
+		req = req.WithContext(WithRequestID(req.Context(), "req-uuid-test-999"))
+
+		WriteError(rec, req, errors.New("boom"))
+
+		if !strings.Contains(rec.Body.String(), `"request_id":"req-uuid-test-999"`) {
+			t.Errorf("expected body to contain request_id, got %q", rec.Body.String())
+		}
+	})
 }
