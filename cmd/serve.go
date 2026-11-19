@@ -11,6 +11,7 @@ import (
 	"github.com/ShajibEwuCse19/gopay-core/repo"
 	"github.com/ShajibEwuCse19/gopay-core/rest"
 	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/customer"
+	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/health"
 	services "github.com/ShajibEwuCse19/gopay-core/services/customer"
 )
 
@@ -44,6 +45,9 @@ func Serve() {
 	customerRepo := repo.NewCustomerRepo(dbCon)
 	serviceCustomer := services.NewService(customerRepo)
 	customerHandler := customer.NewHandler(config, serviceCustomer)
-	server := rest.NewServer(customerHandler, config)
+
+	healthHandler := health.NewHandler(dbCon)
+	
+	server := rest.NewServer(customerHandler, healthHandler, config)
 	server.StartServer()
 }
