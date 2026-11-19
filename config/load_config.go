@@ -132,10 +132,11 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 		LogLevel:    logLevel,
 
 		HTTP: HTTPConfig{
-			Port:         httpPort,
-			ReadTimeout:  durationEnv("HTTP_READ_TIMEOUT", 15*time.Second),
-			WriteTimeout: durationEnv("HTTP_WRITE_TIMEOUT", 15*time.Second),
-			IdleTimeout:  durationEnv("HTTP_IDLE_TIMEOUT", 60*time.Second),
+			Port:              httpPort,
+			ReadHeaderTimeout: durationEnv("HTTP_READ_HEADER_TIMEOUT", 5*time.Second),
+			ReadTimeout:       durationEnv("HTTP_READ_TIMEOUT", 10*time.Second),
+			WriteTimeout:      durationEnv("HTTP_WRITE_TIMEOUT", 15*time.Second),
+			IdleTimeout:       durationEnv("HTTP_IDLE_TIMEOUT", 60*time.Second),
 		},
 
 		DB: DBConfig{

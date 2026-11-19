@@ -33,11 +33,12 @@ func NewServer(
 
 func (server *Server) StartServer() {
 	srv := &http.Server{
-		Addr:         ":" + strconv.Itoa(server.config.HTTP.Port),
-		Handler:      server.buildHandler(),
-		ReadTimeout:  server.config.HTTP.ReadTimeout,
-		WriteTimeout: server.config.HTTP.WriteTimeout,
-		IdleTimeout:  server.config.HTTP.IdleTimeout,
+		Addr:              ":" + strconv.Itoa(server.config.HTTP.Port),
+		Handler:           server.buildHandler(),
+		ReadHeaderTimeout: server.config.HTTP.ReadHeaderTimeout,
+		ReadTimeout:       server.config.HTTP.ReadTimeout,
+		WriteTimeout:      server.config.HTTP.WriteTimeout,
+		IdleTimeout:       server.config.HTTP.IdleTimeout,
 	}
 
 	// ctx will get cancelled signal on Ctrl+C (SIGINT) or SIGTERM

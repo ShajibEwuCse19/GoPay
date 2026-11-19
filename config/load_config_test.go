@@ -35,6 +35,18 @@ func TestLoadFromLookup_Success(t *testing.T) {
 	if cfg.HTTP.Port != 8080 {
 		t.Errorf("HTTP.Port = %d, want 8080", cfg.HTTP.Port)
 	}
+	if cfg.HTTP.ReadHeaderTimeout != 5*time.Second {
+		t.Errorf("HTTP.ReadHeaderTimeout = %v, want 5s", cfg.HTTP.ReadHeaderTimeout)
+	}
+	if cfg.HTTP.ReadTimeout != 10*time.Second {
+		t.Errorf("HTTP.ReadTimeout = %v, want 10s", cfg.HTTP.ReadTimeout)
+	}
+	if cfg.HTTP.WriteTimeout != 15*time.Second {
+		t.Errorf("HTTP.WriteTimeout = %v, want 15s", cfg.HTTP.WriteTimeout)
+	}
+	if cfg.HTTP.IdleTimeout != 60*time.Second {
+		t.Errorf("HTTP.IdleTimeout = %v, want 60s", cfg.HTTP.IdleTimeout)
+	}
 	if cfg.JWT.SecretKey != "my_test_secret_key_32_characters" {
 		t.Errorf("JWT.SecretKey mismatch")
 	}

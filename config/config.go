@@ -20,10 +20,11 @@ type Config struct {
 
 // HTTPConfig holds HTTP server network and timeout settings.
 type HTTPConfig struct {
-	Port         int
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-	IdleTimeout  time.Duration
+	Port              int
+	ReadHeaderTimeout time.Duration
+	ReadTimeout       time.Duration
+	WriteTimeout      time.Duration
+	IdleTimeout       time.Duration
 }
 
 // DBConfig holds PostgreSQL connection settings and pool limits.
