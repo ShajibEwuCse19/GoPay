@@ -32,7 +32,7 @@ func (r *customerRepo) Create(ctx context.Context, c domain.Customer) (*domain.C
 	query := `
 	INSERT INTO customers (phone_number, email, full_name, pin_hash)
 	VALUES (:phone_number, :email, :full_name, :pin_hash)
-	RETURNING *
+	RETURNING id, phone_number, email, full_name, pin_hash, kyc_status, status, created_at, updated_at
 	`
 
 	// creating rows in db and execute INSERT query using c (domain.Customer)
