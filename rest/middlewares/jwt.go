@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -35,11 +34,8 @@ func checkAccessToken(w http.ResponseWriter, r *http.Request) bool {
 	accessToken := headerArray[1] //header.payload.signature
 
 	if utils.VerifyJwt(accessToken) {
-		fmt.Println("Token is valid")
-		fmt.Println("Token: ", accessToken)
 		return true
-	} else {
-		utils.SendError(w, http.StatusUnauthorized, "Unauthorized")
-		return false
 	}
+	utils.SendError(w, http.StatusUnauthorized, "Unauthorized")
+	return false
 }

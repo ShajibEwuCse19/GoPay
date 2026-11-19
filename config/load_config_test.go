@@ -35,6 +35,21 @@ func TestLoadFromLookup_Success(t *testing.T) {
 	if cfg.HTTP.Port != 8080 {
 		t.Errorf("HTTP.Port = %d, want 8080", cfg.HTTP.Port)
 	}
+	if len(cfg.HTTP.AllowedOrigins) != 1 || cfg.HTTP.AllowedOrigins[0] != "http://localhost:3000" {
+		t.Errorf("HTTP.AllowedOrigins = %v, want [\"http://localhost:3000\"]", cfg.HTTP.AllowedOrigins)
+	}
+	if cfg.HTTP.ReadHeaderTimeout != 5*time.Second {
+		t.Errorf("HTTP.ReadHeaderTimeout = %v, want 5s", cfg.HTTP.ReadHeaderTimeout)
+	}
+	if cfg.HTTP.ReadTimeout != 10*time.Second {
+		t.Errorf("HTTP.ReadTimeout = %v, want 10s", cfg.HTTP.ReadTimeout)
+	}
+	if cfg.HTTP.WriteTimeout != 15*time.Second {
+		t.Errorf("HTTP.WriteTimeout = %v, want 15s", cfg.HTTP.WriteTimeout)
+	}
+	if cfg.HTTP.IdleTimeout != 60*time.Second {
+		t.Errorf("HTTP.IdleTimeout = %v, want 60s", cfg.HTTP.IdleTimeout)
+	}
 	if cfg.JWT.SecretKey != "my_test_secret_key_32_characters" {
 		t.Errorf("JWT.SecretKey mismatch")
 	}
@@ -133,5 +148,25 @@ func TestLoadFromLookup_CustomMigrationsPath(t *testing.T) {
 
 	if cfg.DB.MigrationsPath != "/custom/path/migrations" {
 		t.Errorf("DB.MigrationsPath = %q, want %q", cfg.DB.MigrationsPath, "/custom/path/migrations")
+	}
+}
+
+func TestLoadFromLookup_CORSAllowedOrigins(t *testing.T) {
+	env := validTestEnv()
+	env["CORS_ALLOWED_ORIGINS"] = "http://localhost:3000, https://wallet.gopay.com, https://admin.gopay.com"
+
+	cfg, err := LoadFromLookup(func(k string) string { return env[k] })
+	if err != nil {
+		t.Fatalf("expected valid config to load, got error: %v", err)
+	}
+
+	expected := []string{"http://localhost:3000", "https://wallet.gopay.com", "https://admin.gopay.com"}
+	if len(cfg.HTTP.AllowedOrigins) != len(expected) {
+		t.Fatalf("HTTP.AllowedOrigins length = %d, want %d", len(cfg.HTTP.AllowedOrigins), len(expected))
+	}
+	for i, v := range expected {
+		if cfg.HTTP.AllowedOrigins[i] != v {
+			t.Errorf("HTTP.AllowedOrigins[%d] = %q, want %q", i, cfg.HTTP.AllowedOrigins[i], v)
+		}
 	}
 }

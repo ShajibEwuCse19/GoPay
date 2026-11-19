@@ -57,10 +57,15 @@ func (h *Handler) CreateCustomers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var emailStr string
+	if created.Email != nil {
+		emailStr = *created.Email
+	}
+
 	utils.SendResponse(w, http.StatusCreated, RespCustomer{
 		ID:          created.ID,
 		PhoneNumber: created.PhoneNumber,
-		Email:       created.Email,
+		Email:       emailStr,
 		FullName:    created.FullName,
 		KycStatus:   created.KycStatus,
 		Status:      created.Status,

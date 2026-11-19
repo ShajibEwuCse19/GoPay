@@ -13,31 +13,36 @@ import (
 
 	"github.com/ShajibEwuCse19/gopay-core/config"
 	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/customer"
+	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/health"
 	middleware "github.com/ShajibEwuCse19/gopay-core/rest/middlewares"
 )
 
 type Server struct {
 	customerHandler *customer.Handler
+	healthHandler   *health.Handler
 	config          *config.Config
 }
 
 func NewServer(
 	customerHandler *customer.Handler,
+	healthHandler *health.Handler,
 	config *config.Config,
 ) *Server {
 	return &Server{
 		customerHandler: customerHandler,
+		healthHandler:   healthHandler,
 		config:          config,
 	}
 }
 
 func (server *Server) StartServer() {
 	srv := &http.Server{
-		Addr:         ":" + strconv.Itoa(server.config.HTTP.Port),
-		Handler:      server.buildHandler(),
-		ReadTimeout:  server.config.HTTP.ReadTimeout,
-		WriteTimeout: server.config.HTTP.WriteTimeout,
-		IdleTimeout:  server.config.HTTP.IdleTimeout,
+		Addr:              ":" + strconv.Itoa(server.config.HTTP.Port),
+		Handler:           server.buildHandler(),
+		ReadHeaderTimeout: server.config.HTTP.ReadHeaderTimeout,
+		ReadTimeout:       server.config.HTTP.ReadTimeout,
+		WriteTimeout:      server.config.HTTP.WriteTimeout,
+		IdleTimeout:       server.config.HTTP.IdleTimeout,
 	}
 
 	// ctx will get cancelled signal on Ctrl+C (SIGINT) or SIGTERM
@@ -56,7 +61,7 @@ func (server *Server) buildHandler() http.Handler {
 	manager.AppendGlobalMiddlewares(
 		middleware.RequestID,
 		middleware.Recover, // catches panics from every inner middleware and handler
-		middleware.Cors,
+		middleware.Cors(server.config.HTTP.AllowedOrigins),
 		middleware.Preflight,
 		middleware.Logger,
 	)
@@ -64,6 +69,9 @@ func (server *Server) buildHandler() http.Handler {
 	mux := http.NewServeMux()
 	wrapperMux := manager.WrapMuxWithGlobalMiddleware(mux)
 	server.customerHandler.RegisterRoutes(mux, manager)
+	if server.healthHandler != nil {
+		server.healthHandler.RegisterRoutes(mux)
+	}
 
 	return wrapperMux
 }
