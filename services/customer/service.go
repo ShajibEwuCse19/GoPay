@@ -7,17 +7,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type service struct {
+type Service struct {
 	customerRepo CustomerRepo
 }
 
-func NewService(customerRepo CustomerRepo) Service {
-	return &service{
+func NewService(customerRepo CustomerRepo) *Service {
+	return &Service{
 		customerRepo: customerRepo,
 	}
 }
 
-func (s *service) Create(ctx context.Context, in domain.NewCustomer) (*domain.Customer, error) {
+func (s *Service) Create(ctx context.Context, in domain.NewCustomer) (*domain.Customer, error) {
 	in = normalize(in)
 	if err := validate(in); err != nil {
 		return nil, err
@@ -33,9 +33,14 @@ func (s *service) Create(ctx context.Context, in domain.NewCustomer) (*domain.Cu
 		return nil, err
 	}
 
+	var emailPtr *string
+	if in.Email != "" {
+		emailPtr = &in.Email
+	}
+
 	return s.customerRepo.Create(ctx, domain.Customer{
 		PhoneNumber: in.PhoneNumber,
-		Email:       in.Email,
+		Email:       emailPtr,
 		FullName:    in.FullName,
 		PinHash:     string(pinHash),
 	})

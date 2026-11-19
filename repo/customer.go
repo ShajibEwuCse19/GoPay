@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/ShajibEwuCse19/gopay-core/domain"
-	"github.com/ShajibEwuCse19/gopay-core/services/customer"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
@@ -14,25 +13,21 @@ import (
 // pgUniqueViolation is the PostgreSQL error code for a unique constraint violation.
 const pgUniqueViolation = "23505"
 
-type CustomerRepo interface {
-	services.CustomerRepo
-}
-
-type customerRepo struct {
+type CustomerRepo struct {
 	db *sqlx.DB
 }
 
-func NewCustomerRepo(db *sqlx.DB) CustomerRepo {
-	return &customerRepo{
+func NewCustomerRepo(db *sqlx.DB) *CustomerRepo {
+	return &CustomerRepo{
 		db: db,
 	}
 }
 
-func (r *customerRepo) Create(ctx context.Context, c domain.Customer) (*domain.Customer, error) {
+func (r *CustomerRepo) Create(ctx context.Context, c domain.Customer) (*domain.Customer, error) {
 	query := `
 	INSERT INTO customers (phone_number, email, full_name, pin_hash)
 	VALUES (:phone_number, :email, :full_name, :pin_hash)
-	RETURNING *
+	RETURNING id, phone_number, email, full_name, pin_hash, kyc_status, status, created_at, updated_at
 	`
 
 	// creating rows in db and execute INSERT query using c (domain.Customer)

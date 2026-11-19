@@ -94,6 +94,25 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 		return d
 	}
 
+	parseOrigins := func(key, def string) []string {
+		raw := strings.TrimSpace(lookup(key))
+		if raw == "" {
+			raw = def
+		}
+		if raw == "" {
+			return nil
+		}
+		parts := strings.Split(raw, ",")
+		var origins []string
+		for _, p := range parts {
+			trimmed := strings.TrimSpace(p)
+			if trimmed != "" {
+				origins = append(origins, trimmed)
+			}
+		}
+		return origins
+	}
+
 	// 2. Service metadata
 	version := getEnv("VERSION", "1.0.0")
 	serviceName := getEnv("SERVICE_NAME", "FINTECH")
@@ -132,10 +151,12 @@ func loadFromLookup(lookup func(string) string) (*Config, error) {
 		LogLevel:    logLevel,
 
 		HTTP: HTTPConfig{
-			Port:         httpPort,
-			ReadTimeout:  durationEnv("HTTP_READ_TIMEOUT", 15*time.Second),
-			WriteTimeout: durationEnv("HTTP_WRITE_TIMEOUT", 15*time.Second),
-			IdleTimeout:  durationEnv("HTTP_IDLE_TIMEOUT", 60*time.Second),
+			Port:              httpPort,
+			AllowedOrigins:    parseOrigins("CORS_ALLOWED_ORIGINS", "http://localhost:3000"),
+			ReadHeaderTimeout: durationEnv("HTTP_READ_HEADER_TIMEOUT", 5*time.Second),
+			ReadTimeout:       durationEnv("HTTP_READ_TIMEOUT", 10*time.Second),
+			WriteTimeout:      durationEnv("HTTP_WRITE_TIMEOUT", 15*time.Second),
+			IdleTimeout:       durationEnv("HTTP_IDLE_TIMEOUT", 60*time.Second),
 		},
 
 		DB: DBConfig{

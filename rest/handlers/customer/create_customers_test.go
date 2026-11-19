@@ -37,11 +37,12 @@ func post(h *Handler, body string) *httptest.ResponseRecorder {
 }
 
 func TestCreateCustomers_Success(t *testing.T) {
+	email := "rahim@example.com"
 	// fake service return this result
 	h := newTestHandler(&fakeService{result: &domain.Customer{
 		ID:          "id-1",
 		PhoneNumber: "+8801712345678",
-		Email:       "rahim@example.com",
+		Email:       &email,
 		FullName:    "Rahim",
 		PinHash:     "secret-hash",
 		KycStatus:   "UNVERIFIED",
@@ -61,6 +62,29 @@ func TestCreateCustomers_Success(t *testing.T) {
 	}
 	if !strings.Contains(body, `"id":"id-1"`) {
 		t.Errorf("response is missing the customer id: %s", body)
+	}
+}
+
+func TestCreateCustomers_NullEmail_Success(t *testing.T) {
+	// simulate a customer created without email (Email is nil / database NULL)
+	h := newTestHandler(&fakeService{result: &domain.Customer{
+		ID:          "id-2",
+		PhoneNumber: "+8801712345679",
+		Email:       nil,
+		FullName:    "Karim",
+		PinHash:     "secret-hash",
+		KycStatus:   "UNVERIFIED",
+		Status:      "ACTIVE",
+	}})
+
+	rec := post(h, validBody)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("status = %d, want 201", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, `"email":""`) {
+		t.Errorf("expected empty string for null email, got body: %s", body)
 	}
 }
 
