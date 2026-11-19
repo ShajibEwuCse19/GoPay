@@ -33,7 +33,13 @@ func Serve() {
 		slog.Error("Database connection failed", "error", err)
 		os.Exit(1)
 	}
-	defer dbCon.Close()
+	defer func() {
+		if err := dbCon.Close(); err != nil {
+			slog.Error("failed to close database connection", "error", err)
+			return
+		}
+		slog.Info("database connection closed")
+	}()
 
 	customerRepo := repo.NewCustomerRepo(dbCon)
 	serviceCustomer := services.NewService(customerRepo)
