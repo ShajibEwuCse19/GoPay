@@ -10,7 +10,6 @@ func NewConnection(config *config.Config) (*sqlx.DB, error) {
 	dbSource := getConnectionString(config)
 	dbConnection, err := sqlx.Connect("postgres", dbSource)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	return dbConnection, nil
