@@ -13,20 +13,24 @@ import (
 
 	"github.com/ShajibEwuCse19/gopay-core/config"
 	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/customer"
+	"github.com/ShajibEwuCse19/gopay-core/rest/handlers/health"
 	middleware "github.com/ShajibEwuCse19/gopay-core/rest/middlewares"
 )
 
 type Server struct {
 	customerHandler *customer.Handler
+	healthHandler   *health.Handler
 	config          *config.Config
 }
 
 func NewServer(
 	customerHandler *customer.Handler,
+	healthHandler *health.Handler,
 	config *config.Config,
 ) *Server {
 	return &Server{
 		customerHandler: customerHandler,
+		healthHandler:   healthHandler,
 		config:          config,
 	}
 }
@@ -65,6 +69,9 @@ func (server *Server) buildHandler() http.Handler {
 	mux := http.NewServeMux()
 	wrapperMux := manager.WrapMuxWithGlobalMiddleware(mux)
 	server.customerHandler.RegisterRoutes(mux, manager)
+	if server.healthHandler != nil {
+		server.healthHandler.RegisterRoutes(mux)
+	}
 
 	return wrapperMux
 }
