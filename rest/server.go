@@ -57,7 +57,7 @@ func (server *Server) buildHandler() http.Handler {
 	manager.AppendGlobalMiddlewares(
 		middleware.RequestID,
 		middleware.Recover, // catches panics from every inner middleware and handler
-		middleware.Cors,
+		middleware.Cors(server.config.HTTP.AllowedOrigins),
 		middleware.Preflight,
 		middleware.Logger,
 	)

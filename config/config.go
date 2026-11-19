@@ -18,9 +18,10 @@ type Config struct {
 	JWTSecretKey string
 }
 
-// HTTPConfig holds HTTP server network and timeout settings.
+// HTTPConfig holds HTTP server network, timeout, and CORS settings.
 type HTTPConfig struct {
 	Port              int
+	AllowedOrigins    []string
 	ReadHeaderTimeout time.Duration
 	ReadTimeout       time.Duration
 	WriteTimeout      time.Duration
