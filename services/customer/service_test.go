@@ -53,8 +53,8 @@ func TestCreate_HashesPinAndNormalizes(t *testing.T) {
 	if err := bcrypt.CompareHashAndPassword([]byte(repo.received.PinHash), []byte(in.Pin)); err != nil {
 		t.Fatalf("stored value is not a valid bcrypt hash of the PIN: %v", err)
 	}
-	if repo.received.Email != "rahim@example.com" {
-		t.Errorf("email not normalized: %q", repo.received.Email)
+	if repo.received.Email == nil || *repo.received.Email != "rahim@example.com" {
+		t.Errorf("email not normalized: %v", repo.received.Email)
 	}
 	if repo.received.FullName != "Rahim Uddin" {
 		t.Errorf("full name not trimmed: %q", repo.received.FullName)

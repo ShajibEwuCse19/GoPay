@@ -15,7 +15,7 @@ type NewCustomer struct {
 type Customer struct {
 	ID          string    `json:"id" db:"id"`
 	PhoneNumber string    `json:"phone_number" db:"phone_number"`
-	Email       string    `json:"email" db:"email"`
+	Email       *string   `json:"email" db:"email"`
 	FullName    string    `json:"full_name" db:"full_name"`
 	PinHash     string    `json:"-" db:"pin_hash"` // Hide this field from JSON output
 	KycStatus   string    `json:"kyc_status" db:"kyc_status"`

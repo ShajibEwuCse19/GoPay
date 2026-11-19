@@ -33,9 +33,14 @@ func (s *service) Create(ctx context.Context, in domain.NewCustomer) (*domain.Cu
 		return nil, err
 	}
 
+	var emailPtr *string
+	if in.Email != "" {
+		emailPtr = &in.Email
+	}
+
 	return s.customerRepo.Create(ctx, domain.Customer{
 		PhoneNumber: in.PhoneNumber,
-		Email:       in.Email,
+		Email:       emailPtr,
 		FullName:    in.FullName,
 		PinHash:     string(pinHash),
 	})
